@@ -1,0 +1,60 @@
+<!doctype html>
+<html>
+<head>
+<title>Live Commerce</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<link rel="stylesheet" href="css/bootstrap.min.css">
+<link rel="stylesheet" href="css/main.css">
+<script src="js/config.js"></script>
+<script src="js/AgoraSig-1.4.0.js"></script>
+<script src="js/AgoraRTCSDK-2.8.0.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script src="js/video.js"></script>
+<script src="js/signaling.js"></script>
+<script src="js/main.js"></script>
+</head>
+<body>
+<div id="wrapper">
+    <div id="infomationPannel">
+        <div id="infomationPannelChild">
+            View:0<br />
+            Heart:0
+        </div>
+    </div>    
+    <div id="video">
+        <a href="#"><img id="playButton" src="img/play.png" onclick="playStream();"/></a>
+    </div>
+    <div id="chatBox"></div>
+    <div id="enableChatView">
+        <input id="message" type="text" /><button onclick="sendMessage();">send</button><button onclick="editNickName();">ChangeName</button>
+    </div>
+    <div id="disabeleChatView">
+        <input id="nickName" type="text" /><button onclick="setNickName();">login</button>
+    </div>
+    <div id="heartBox">
+    <a href="" onclick="sendHeart(); return false;"><img id="heart" src="./img/Heart.png" /></a>
+    </div>
+
+
+</div>
+
+<script language="javascript">
+    $(function(){
+
+        //#todo chenge wrapper pc or mobile
+        if(getDevice == 'sp'){
+            var wrapper = document.getElementById("wrapper");
+            wrapper.style.width  = width+"px";
+            wrapper.style.height = height+"px";
+        }
+
+        var video = document.getElementById("video");
+        var parent = video.parentNode;
+        video.style.width  = parent.clientWidth+"px";
+        video.style.height = parent.clientHeight+"px";
+        loadSetting(true);
+    });
+</script>
+</body>
+</html>

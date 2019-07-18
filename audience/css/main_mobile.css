@@ -1,0 +1,116 @@
+body{
+    background: #000000;
+}
+
+#wrapper{
+    position:relative;
+    width:480px;
+    height:848px;
+    margin: auto;
+    background: #FFFFFF;
+    text-align: center;
+
+}
+
+#video{
+    position: relative;
+    background: #FFFFFF;
+    /*width:480px;
+    height:848px;*/
+}
+
+#playButton{
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    position: absolute;
+    margin: auto;
+    width: 128px;
+    height: 128px;
+    z-index: 9999;
+    display: none;
+}
+
+#infomationPannel{
+    /*display: block;*/
+    width: 480px;
+    height: 50px;
+    position: fixed;
+    /*left: 0px;*/
+    /*top: 0px;*/
+    z-index: 9998;
+    padding: 0 auto;
+    background-color:#FFFFFF;
+    opacity: 0.5;
+
+}
+
+
+#chatBox{
+    position: fixed;
+    margin:5px;
+    height:200px;
+    width: 100%;
+    bottom: 50px;
+    overflow-y: scroll;
+    text-align: left;
+    z-index: 9999;
+}
+
+
+.comment{
+    border-radius: 3px;
+    background: #000000;
+    color: #FFFFFF;
+    padding:5px;
+    margin-bottom: 2px;
+    clear: both;
+    float:left;
+}
+
+#disabeleChatView{
+    margin:5px;
+    float: left;
+    bottom: 0px;
+    position: fixed;
+    z-index: 9999;
+}
+
+#enableChatView{
+    margin:5px;
+    float: left;
+    bottom: 0px;
+    position: fixed;
+    z-index: 9999;
+}
+
+#heartBox{
+    margin:5px;
+    right: 0px;
+    bottom: 0px;
+    position: fixed;
+    z-index: 9999;
+}
+
+
+
+
+
+#infomationPannelChild{
+    margin:5px;
+    float: left;
+}
+#toKit{
+    margin:5px;
+    float: left;
+}
+
+
+
+#heart {
+    height: 50px;
+    width: 50px;
+    position: relative;
+}
+

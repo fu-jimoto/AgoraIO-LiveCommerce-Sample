@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<title>Live Commerce</title>
+<link rel="stylesheet" href="css/bootstrap.min.css">
+<script src="js/config.js"></script>
+<script src="js/AgoraSig-1.4.0.js"></script>
+<script src="js/AgoraRTCSDK-2.8.0.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script src="js/video.js"></script>
+<script src="js/signaling.js"></script>
+<script src="js/main.js"></script>
+
+</head>
+<body>
+  <div id="div_join" class="panel panel-default">
+    <div class="panel-body">
+      <button id="publish" class="btn btn-primary" onclick="publish()">Start Live</button>
+      <button id="leave" class="btn btn-primary" onclick="leave()">End Live</button>
+      <button id="video_mute" class="btn btn-primary" onclick="videoMute()">Video ON</button>
+      <button id="audio_mute" class="btn btn-primary" onclick="audioMute()">Audio ON</button>
+      <label for="audioSource">mic: </label><select id="audioSource"></select>
+      <label for="videoSource">camera: </label><select id="videoSource"></select>
+      <button id="changeDevice" class="btn btn-primary" onclick="changeDevice()">Change Device</button>
+    </div>
+  </div>
+  
+  <div class="panel panel-default" style="width:848px;height:560px;float:left;">
+    <div class="panel-heading">
+      <div id="count_information">[ Heart : 0 | View : 0 ]</div>
+    </div>
+    <div id="video" style="background:#000000;">
+      <div id="agora_local" style="width:292px;height:517px;margin: 0 auto;"></div>
+    </div>
+  </div>
+
+  <div class="panel panel-default" style="width: 350px; height:560px;display:inline-block;">
+    <div class="panel-heading">Chat</div>
+    <div class="panel-body" id="chatBox" style="height:450px; overflow-y: scroll;"></div>
+    <div class="panel-body">
+      <table>
+        <tr>
+        <td><input type="text" name="" class="form-control" id="message" aria-describedby="" placeholder="" style="width:235px;" /></td>
+        <td><button type="submit" class="btn btn-primary" id="btnSendMessage" onclick="sendMessage();">send</button></td>
+        </tr>
+      </table>
+    </div> 
+  </div>
+
+  <script language="javascript">
+
+    $(function(){
+      loadSetting();
+    });
+  </script>
+</body>
+</html>
