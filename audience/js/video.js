@@ -1,71 +1,53 @@
-var client, publisherId, remoteStream;
-var muted  = false;
-var width  = window.innerWidth;
-var height = window.innerHeight;
+var client, publisherId, remoteStream, remoteStreamType;
+var playing = false;
+var width   = window.innerWidth;
+var height  = window.innerHeight;
 
-AgoraRTC.Logger.enableLogUpload();
+AgoraRTC.enableLogUpload();
 
-function join(){
+async function join(){
     client = AgoraRTC.createClient({mode: 'live', codec:'vp8'});
-    client.init(appId, function () {
-        client.join(null, channelName, null, function(uid) {
 
-            $.ajax(COUNT_UP_URL+"?type="+countTypeList.view+"&live_id="+liveId,
-            {
-                type: 'get'
-            })
-            .done(function(data){
-            })
-            .fail(function() {
-            });
-
-        }, function(err) {
-            console.log("Join channel failed", err);
-        });
-    }, function (err) {
-        console.log("AgoraRTC client init failed", err);
+    [ uid ] = await Promise.all([
+        client.join(appId, channelName, null)
+    ]);
+    $.ajax(COUNT_UP_URL+"?type="+countTypeList.view+"&live_id="+liveId,
+    {
+        type: 'get'
+    })
+    .done(function(data){
+    })
+    .fail(function() {
     });
 
-    client.on('stream-added', function (evt) {
-        var stream = evt.stream;
-        client.subscribe(stream, function (err) {
-        });
-    });
-
-    client.on('stream-subscribed', function (evt) {
-        var playButton = document.querySelector("#playButton");
-        playButton.style.display = "block";
-        remoteStream = evt.stream;
-    });
-
-    client.on('stream-removed', function (evt) {
-        $('#agora_remote' + remoteStream.getId()).remove();
-        var playButton = document.querySelector("#playButton");
-        playButton.style.display = "none";
-    });
-    
-    client.on('peer-leave', function (evt) {
-        if (remoteStream) {
-            $('#agora_remote' + remoteStream.getId()).remove();
+    client.on("user-published", async function (user, mediaType) {
+        if(playing===false){
+            var playButton = document.querySelector("#playButton");
+            playButton.style.display = "block";
+            remoteStream = user;
+            remoteStreamType = mediaType;    
+        }else{
+            await client.subscribe(user, mediaType);
+            if(mediaType === 'video'){
+                user.videoTrack.play('agora_remote'+remoteStream.uid);
+            }
+            if (mediaType === 'audio') {
+                user.audioTrack.play();
+            }
         }
-        var playButton = document.querySelector("#playButton");
-        playButton.style.display = "none";
     });
 }
 
-function playStream(){
+async function playStream(){
+    await client.subscribe(remoteStream, "video");
+    await client.subscribe(remoteStream, "audio");
     var playButton = document.querySelector("#playButton");
     playButton.style.display = "none";
-    $('div#video').append('<div id="agora_remote'+remoteStream.getId()+'" style="float:left; width:'+video.style.width+';height:'+video.style.height+';display:inline-block;"></div>');
-    remoteStream.play('agora_remote'+remoteStream.getId());
-    publisherId = remoteStream.getId();
-    removeControls(remoteStream.getId());
+    $('div#video').append('<div id="agora_remote'+remoteStream.uid+'" style="float:left; width:'+video.style.width+';height:'+video.style.height+';display:inline-block;"></div>');
+    remoteStream.videoTrack.play('agora_remote'+remoteStream.uid);
+    remoteStream.audioTrack.play();
+    publisherId = remoteStream.uid;
+    playing = true;
 }
 
-function removeControls(streamId){
-    var videoDiv = $("#video"+streamId);
-    if (videoDiv && videoDiv.length > 0) {
-        var tmpVideoDiv = videoDiv.get(0);
-        tmpVideoDiv.removeAttribute("controls");
-    }
-}
+

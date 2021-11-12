@@ -1,21 +1,25 @@
-var signal = Signal(appId);
-var session, channel, call, g_uid;
+var rtm = AgoraRTM.createInstance(appId);
+var rtmChannel;
 
-function loginToSignaling() {
+async function loginToRTM() {
     var account = createRandomString();
-    session = signal.login(account,"_no_need_token");
-    session.onLoginSuccess = function(uid){
-        console.log("login success");
-        channel = session.channelJoin(channelName);
-        channel.onMessageChannelReceive = function(account, uid, msg){
-            var data = JSON.parse(msg);
-            $('div#chatBox').append('<div class="comment">'+data.nickName+':'+data.message+'</div>');
-            $('div#chatBox').animate({scrollTop: $('div#chatBox')[0].scrollHeight}, 'fast');
-        }
-    };
-    session.onLoginFailed = function(ecode){
-        console.log('login failed ' + ecode);
-    };
+    await rtm.login({ token: '', uid: account }).then(() => {
+        console.log('AgoraRTM client login success');
+        //rtm channel
+        rtmChannel = rtm.createChannel(channelName);
+        rtmChannel.join().then(()=>{
+            console.log("RTM Join Channel Success");
+            rtmChannel.on('ChannelMessage', function (message, memberId) {
+                console.log("Get channel message:"+memberId);
+                console.dir(message);
+                var data = JSON.parse(message.text);
+                $('div#chatBox').append('<div class="comment">'+data.nickName+':'+data.message+'</div>');
+                $('#chatBox').animate({scrollTop: $('#chatBox')[0].scrollHeight}, 'fast');
+            });
+        });
+    }).catch(err => {
+        console.log('AgoraRTM client login failure', err);
+    });
 }
 
 function createRandomString(){
@@ -29,13 +33,13 @@ function createRandomString(){
     return r;
 }
 
-function sendMessage(){
+async function sendMessage(){
     if($('#message').val() && $('#message').val().length <= 100 && nickName){
         var str = escapeHTML($('#message').val());
         var data = JSON.stringify({"nickName":nickName, "message":str});
-        channel.messageChannelSend(data, function(){});
+        rtmChannel.sendMessage({text: data});
         postChat(nickName, str);
-        $('#message').val("");            
+        $('#message').val("");
     }
 }
 

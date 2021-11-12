@@ -1,4 +1,4 @@
-var appId             = "YOUR APP ID";
+var appId             = "";
 var liveId;
 var baseChannelName   = "livecommerce";
 var channelName;
@@ -12,7 +12,7 @@ var putCountInfoInt   = 60*1000;
 var logTag            = "#LC ";
 var ON_LINE           = 1;
 var OFF_LINE          = 2;
-var BASE_URL          = "http://YOUR_HOST";
+var BASE_URL          = "http://YOUR HOST";
 var GET_COUNT_URL     = BASE_URL+"/api/get_live_info.php";
 var STATUS_CHANGE_URL = BASE_URL+"/api/put_live_status.php";
 var COUNT_UP_URL      = BASE_URL+"/api/put_live_count.php";

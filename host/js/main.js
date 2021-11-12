@@ -19,9 +19,10 @@ function loadSetting(){
         viewControl(OFF_LINE);
         join();
         getDevices();
-        loginToSignaling();
+        loginToRTM();
     })
     .fail(function() {
+        alert(22);
     });
 }
 

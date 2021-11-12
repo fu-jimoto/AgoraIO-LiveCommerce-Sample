@@ -39,7 +39,7 @@ function loadSetting(init=false){
             getLiveInformation();
             setInterval(getLiveInformation, getCountInfoInt);
             join();
-            loginToSignaling();
+            loginToRTM();
         })
         .fail(function() {
         });

@@ -1,50 +1,32 @@
 var videoEnable  = true;
 var audioEnable  = true;
-var client, localStream, camera, microphone;
+var client,camera, microphone;
 var audioSelect, videoSelect;
+var localTracks = {
+    audioTrack: null,
+    videoTrack: null
+};
 
-AgoraRTC.Logger.enableLogUpload();
+AgoraRTC.enableLogUpload();
 
-function join() {
-    var channel_key = null;
-    client = AgoraRTC.createClient({mode: 'live', codec:'vp8'});
-    client.init(appId, function () {
-      client.join(channel_key, channelName, gUid, function(uid) {
-          console.log("User " + uid + " join channel successfully");
-          camera      = videoSource.value;
-          microphone  = audioSource.value;
-          localStream = AgoraRTC.createStream({streamID: uid, audio: true, cameraId: camera, microphoneId: microphone, video: true, screen: false});
-          localStream.setVideoProfile(videoProfile);
-          localStream.on("accessAllowed", function() {
-              console.log("accessAllowed");
-          });
-          localStream.on("accessDenied", function() {
-            console.log("accessDenied");
-          });
-          localStream.init(function() {
-            console.log("getUserMedia successfully");
-            localStream.play('agora_local',{fit: 'cover'});
-          }, function (err) {
-            console.log("getUserMedia failed", err);
-          });
-        
-      }, function(err) {
-        console.log("Join channel failed", err);
-      });
-    }, function (err) {
-      console.log("AgoraRTC client init failed", err);
-    });
-    channelKey = "";
-    client.on('error', function(err) {
-      console.log("Got error msg:", err.reason);
-    });
-    client.on('peer-leave', function (evt) {
-      console.log(evt.uid + " leaved from this channel");
-    });
+async function join() {
+
+    client = AgoraRTC.createClient({ mode: "live", codec: "vp8" });
+    client.setClientRole("host");
+
+    camera      = videoSource.value;
+    microphone  = audioSource.value;
+
+    [ uid, localTracks.audioTrack, localTracks.videoTrack ] = await Promise.all([
+        client.join(appId, channelName, null, gUid),
+        AgoraRTC.createMicrophoneAudioTrack({microphoneId: microphone}),
+        AgoraRTC.createCameraVideoTrack({cameraId: camera,encoderConfig:videoProfile})
+    ]);
+    localTracks.videoTrack.play('agora_local',{fit: 'cover'});
 }
 
 function getDevices() {
-    AgoraRTC.getDevices(function (devices) {
+    AgoraRTC.getDevices().then(devices => {
         for (var i = 0; i !== devices.length; ++i) {
             var device = devices[i];
             var option = document.createElement('option');
@@ -62,20 +44,16 @@ function getDevices() {
     });
 }
 
-function publish(){
-    client.publish(localStream, function (err) {
-      console.log("Publish local stream error: " + err);
-    });
-    client.on('stream-published', function (evt) {
-        console.log("Publish local stream successfully");
-        viewControl(ON_LINE);
-        $.ajax(STATUS_CHANGE_URL+"?live_id="+liveId+"&status="+liveStatusList.open,
-        {
-            type: 'get',
-        }).done(function(data){
-        }
-        ).fail(function() {
-        });
+async function publish(){
+    await client.publish(Object.values(localTracks));
+    console.log("Publish local stream successfully");
+    viewControl(ON_LINE);
+    $.ajax(STATUS_CHANGE_URL+"?live_id="+liveId+"&status="+liveStatusList.open,
+    {
+        type: 'get',
+    }).done(function(data){
+    }
+    ).fail(function() {
     });
 }
 
@@ -99,11 +77,11 @@ function leave() {
 
 function videoMute() {
     if(videoEnable == true){
-        localStream.disableVideo();
+        localTracks.videoTrack.setMuted(true);
         $("#video_mute").text("Video OFF");
         videoEnable = false;
     }else{
-        localStream.enableVideo();
+        localTracks.videoTrack.setMuted(false);
         $("#video_mute").text("Video ON");
         videoEnable = true;
     }
@@ -111,25 +89,32 @@ function videoMute() {
 
 function audioMute() {
     if(audioEnable == true){
-        localStream.disableAudio();
+        localTracks.audioTrack.setMuted(true);
         $("#audio_mute").text("Audio OFF");
         audioEnable = false;
     }else{
-        localStream.enableAudio();
+        localTracks.audioTrack.setMuted(false);
         $("#audio_mute").text("Audio ON");
         audioEnable = true;
     }
 }
 
-function changeDevice(){
+async function changeDevice(){
     audioSelect = document.querySelector('select#audioSource');
     videoSelect = document.querySelector('select#videoSource');
     camera     = videoSource.value;
     microphone = audioSource.value;
-    var localStream2 = AgoraRTC.createStream({streamID: gUid, audio: true, cameraId: camera, microphoneId: microphone, video: true, screen: false});
-    localStream2.setVideoProfile(videoProfile);
-    localStream2.init(function(){
-        var newVideoTrack = localStream2.getVideoTrack();
-        localStream.replaceTrack(newVideoTrack);
-    });
+    await client.unpublish(Object.values(localTracks));
+    await localTracks.videoTrack.stop();
+    await localTracks.videoTrack.close();
+
+    [ localTracks.audioTrack, localTracks.videoTrack ] = await Promise.all([
+        AgoraRTC.createMicrophoneAudioTrack({microphoneId: microphone}),
+        AgoraRTC.createCameraVideoTrack({cameraId: camera,encoderConfig:videoProfile})
+    ]);
+    localTracks.videoTrack.play('agora_local',{fit: 'cover'});
+    
+    await client.publish(Object.values(localTracks));
+    console.log("publish success");
+
 }
